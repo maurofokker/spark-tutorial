@@ -19,6 +19,7 @@ public class TakeExample {
         List<String> inputWords = Arrays.asList("spark", "hadoop", "spark", "hive", "pig", "cassandra", "hadoop");
         JavaRDD<String> wordRdd = sc.parallelize(inputWords);
 
+        // take first three elements in an RDD
         List<String> words = wordRdd.take(3);
 
         for (String  word : words) {
