@@ -16,9 +16,12 @@ public class CollectExample {
         SparkConf conf = new SparkConf().setAppName("collect").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
+        // create a list of strings
         List<String> inputWords = Arrays.asList("spark", "hadoop", "spark", "hive", "pig", "cassandra", "hadoop");
+        // parallelize takes a list and return an RDD of the same type of input list
         JavaRDD<String> wordRdd = sc.parallelize(inputWords);
 
+        // perform collect action on RDD and return a list of the same type
         List<String> words = wordRdd.collect();
 
         for (String  word : words) {
