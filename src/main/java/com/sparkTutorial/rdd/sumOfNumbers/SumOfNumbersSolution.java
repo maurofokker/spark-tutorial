@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class SumOfNumbersSolution {
 
@@ -21,8 +22,9 @@ public class SumOfNumbersSolution {
 
         JavaRDD<String> validNumbers = numbers.filter(number -> !number.isEmpty());
 
-        JavaRDD<Integer> intNumbers = validNumbers.map(number -> Integer.valueOf(number));
+        List<Integer> intNumbers = validNumbers.map(number -> Integer.valueOf(number)).take(100);
+        JavaRDD<Integer> integerJavaRDD = sc.parallelize(intNumbers);
 
-        System.out.println("Sum is: " + intNumbers.reduce((x, y) -> x + y));
+        System.out.println("Sum is: " + integerJavaRDD.reduce((x, y) -> x + y));
     }
 }
