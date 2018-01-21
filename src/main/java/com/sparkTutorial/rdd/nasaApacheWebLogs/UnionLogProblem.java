@@ -1,5 +1,9 @@
 package com.sparkTutorial.rdd.nasaApacheWebLogs;
 
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+
 public class UnionLogProblem {
 
     public static void main(String[] args) throws Exception {
@@ -14,5 +18,29 @@ public class UnionLogProblem {
 
            Make sure the head lines are removed in the resulting RDD.
          */
+
+        // run with all cores in local cpu
+        SparkConf sparkConf = new SparkConf().setAppName("unionNasaLogs").setMaster("local[*]");
+
+        JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
+
+        // load input files into RDD
+        JavaRDD<String> julyFirstLogs = sparkContext.textFile("in/nasa_19950701.tsv");
+        JavaRDD<String> augustFirstLogs = sparkContext.textFile("in/nasa_19950801.tsv");
+
+        // using the union of RDDs
+        JavaRDD<String> aggregatedLogLines = julyFirstLogs.union(augustFirstLogs);
+
+        // clean logs, remove lines that contain header
+        JavaRDD<String> cleanLogLines = aggregatedLogLines.filter(line -> inNotHeader(line));
+
+        // set sample
+        JavaRDD<String> sample = cleanLogLines.sample(true, 0.1);
+
+        sample.saveAsTextFile("out/sample_nasa_logs_01.csv");
+    }
+
+    private static boolean inNotHeader(String line) {
+        return !(line.startsWith("host") && line.contains("bytes"));
     }
 }
