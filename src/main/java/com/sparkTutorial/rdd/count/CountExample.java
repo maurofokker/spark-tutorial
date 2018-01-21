@@ -20,12 +20,15 @@ public class CountExample {
         List<String> inputWords = Arrays.asList("spark", "hadoop", "spark", "hive", "pig", "cassandra", "hadoop");
         JavaRDD<String> wordRdd = sc.parallelize(inputWords);
 
+        // total count of values in RDD (duplicates are count)
         System.out.println("Count: " + wordRdd.count());
 
+        // return a map with each unique word and its count
         Map<String, Long> wordCountByValue = wordRdd.countByValue();
 
         System.out.println("CountByValue:");
 
+        // when print countByValue word appears once but u can get the count
         for (Map.Entry<String, Long> entry : wordCountByValue.entrySet()) {
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
