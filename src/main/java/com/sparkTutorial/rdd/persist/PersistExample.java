@@ -20,6 +20,8 @@ public class PersistExample {
         List<Integer> inputIntegers = Arrays.asList(1, 2, 3, 4, 5);
         JavaRDD<Integer> integerRdd = sc.parallelize(inputIntegers);
 
+        // perform persist to reuse RDD in other actions bc if not persisted (cached) it will
+        // be generated every time action is called affecting perform
         integerRdd.persist(StorageLevel.MEMORY_ONLY());
 
         integerRdd.reduce((x, y) -> x * y);
