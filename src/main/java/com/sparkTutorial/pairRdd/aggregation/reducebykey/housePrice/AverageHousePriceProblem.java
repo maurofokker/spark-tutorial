@@ -1,6 +1,17 @@
 package com.sparkTutorial.pairRdd.aggregation.reducebykey.housePrice;
 
 
+import com.sparkTutorial.rdd.commons.Utils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
+
+import java.util.Map;
+
 public class AverageHousePriceProblem {
 
     public static void main(String[] args) throws Exception {
@@ -34,6 +45,37 @@ public class AverageHousePriceProblem {
 
            3, 1 and 2 mean the number of bedrooms. 325000 means the average price of houses with 3 bedrooms is 325000.
          */
+        Logger.getLogger("org").setLevel(Level.ERROR);
+        SparkConf conf = new SparkConf().setAppName("averageHousePrice").setMaster("local[3]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        JavaRDD<String> lines = sc.textFile("in/RealEstate.csv");
+        JavaRDD<String> cleanedLines = lines.filter(line -> !line.contains("Bedrooms"));
+
+        // pair rdd with bedrooms as key and AvgCount object with the count and price
+        JavaPairRDD<String, AvgCount> housePricePairRdd = cleanedLines.mapToPair(
+                line -> new Tuple2<>(line.split(Utils.COMMA_DELIMITER)[3],
+                        new AvgCount(1, Double.parseDouble(line.split(Utils.COMMA_DELIMITER)[2]))));
+        System.out.println("housePricePairRdd: ");
+        for (Map.Entry<String, AvgCount> housePricePair : housePricePairRdd.collectAsMap().entrySet()) {
+            System.out.println(housePricePair.getKey() + " : " + housePricePair.getValue());
+        }
+        System.out.println("------------------------------------------------------------------------");
+        // apply reduceByKey returning as value an AvgCount object with total
+        JavaPairRDD<String, AvgCount> housePriceTotal = housePricePairRdd.reduceByKey(
+                (x, y) -> new AvgCount(x.getCount() + y.getCount(), x.getTotal() + y.getTotal()));
+
+        System.out.println("housePriceTotal: ");
+        for (Map.Entry<String, AvgCount> housePriceTotalPair : housePriceTotal.collectAsMap().entrySet()) {
+            System.out.println(housePriceTotalPair.getKey() + " : " + housePriceTotalPair.getValue());
+        }
+        System.out.println("------------------------------------------------------------------------");
+
+        JavaPairRDD<String, Double> housePriceAvg = housePriceTotal.mapValues(avgCount -> avgCount.getTotal()/avgCount.getCount());
+        System.out.println("housePriceAvg: ");
+        for (Map.Entry<String, Double> housePriceAvgPair : housePriceAvg.collectAsMap().entrySet()) {
+            System.out.println(housePriceAvgPair.getKey() + " : " + housePriceAvgPair.getValue());
+        }
     }
 
 }

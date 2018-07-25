@@ -26,7 +26,7 @@ public class AirportsInUsaProblem {
         // spark config in 2 local cores
         SparkConf conf = new SparkConf().setAppName("airports").setMaster("local[2]");
 
-        // spark contect is the main entry point; represent the conn to spark cluster
+        // spark context is the main entry point; represent the conn to spark cluster
         // it can be use to create RDDsm accumulators and broadcast variables on the cluster
         JavaSparkContext sc = new JavaSparkContext(conf);
 
